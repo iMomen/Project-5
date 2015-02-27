@@ -4,11 +4,11 @@ function appViewModel() {
   var service;
   var infowindow;
   var chapelHill = new google.maps.LatLng(35.908759, -79.048100);
-  var bounds;
-  var marker;
   var markersArray = [];
 
   self.allPlaces = ko.observableArray([]);
+
+
 
   function populateAllPlaces(place){
     var myPlace = {};
@@ -70,11 +70,10 @@ function appViewModel() {
   }
 
   function getPlaces() {
-    self.allPlaces([]);
     var request = {
       location: chapelHill,
       radius: 600,
-      types: ['restaurant', 'bar', 'cafe']
+      types: ['restaurant', 'bar', 'cafe', 'food']
     };
 
     infowindow = new google.maps.InfoWindow();
@@ -97,7 +96,7 @@ function appViewModel() {
   }
 
   function createMarker(place) {
-    marker = new google.maps.Marker({
+    var marker = new google.maps.Marker({
       map: map,
       position: place.geometry.location,
       animation: google.maps.Animation.DROP
@@ -124,9 +123,9 @@ function appViewModel() {
     markersArray.length = 0;
   }
 
-
   google.maps.event.addDomListener(window, 'load', initialize);
 };
+
 $(function(){
 ko.applyBindings(new appViewModel());
 });
