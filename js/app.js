@@ -9,6 +9,9 @@ function appViewModel() {
 
   self.allPlaces = ko.observableArray([]);
 
+  /*
+  Function that will pan to the position and open an info window of an item clicked in the list.
+  */
   self.clickMarker = function(place) {
     for(var e = 0; e < markersArray.length; e++)
     if(place.place_id === markersArray[e].place_id) {      
@@ -19,6 +22,9 @@ function appViewModel() {
     }
   }
 
+  /*
+  function that gets the information from all the places that we are going to search and also pre-populate.  Pushes this info to the allPlaces array for knockout.
+  */
   function getAllPlaces(place){
     var myPlace = {};    
     myPlace.place_id = place.place_id;
@@ -36,6 +42,9 @@ function appViewModel() {
     self.allPlaces.push(myPlace);
   }
 
+  /*
+  Loads the map as well as position the search bar and list.  On a search, clearOverlays removes all markers already on the map and removes all info in allPlaces.  Then, once a search is complete, populates more markers and sends the info to getAllPlaces to populate allPlaces again.
+  */
   function initialize() {
     map = new google.maps.Map(document.getElementById('map-canvas'), {
     center: chapelHill,    
@@ -71,6 +80,9 @@ function appViewModel() {
     });
   }
 
+  /*
+  Function to pre-populate the map with place types.  nearbySearch retuns up to 20 places.
+  */
   function getPlaces() {
     var request = {
       location: chapelHill,
@@ -83,6 +95,9 @@ function appViewModel() {
     service.nearbySearch(request, callback);
   }
 
+  /*
+  Gets the callback from Google and creates a marker for each place.  Sends info to getAllPlaces.
+  */
   function callback(results, status){
     if (status == google.maps.places.PlacesServiceStatus.OK){
       bounds = new google.maps.LatLngBounds();
@@ -97,6 +112,9 @@ function appViewModel() {
     }
   }
 
+  /*
+  Function to create a marker at each place.  This is called on load of the map with the pre-populated list, and also after each search.  Also sets the content of each place's infowindow.
+  */
   function createMarker(place) {
     var marker = new google.maps.Marker({
       map: map,
@@ -125,6 +143,9 @@ function appViewModel() {
     return marker;
   }
 
+  /*
+  called after a search, this function clears any markes in the markersArray so that we can start with fresh map with new markers.
+  */
   function clearOverlays() {
     for (var i = 0; i < markersArray.length; i++ ) {
      markersArray[i].setMap(null);
