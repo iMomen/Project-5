@@ -6,6 +6,15 @@ body {
 	height: 100%; margin: 0; padding: 0 
 }
 
+li {
+    cursor: pointer;
+    cursor: hand;    
+}
+
+li:hover {
+    background-color: #0099FF;
+}
+
 #map-canvas { 
 	height: 100% 
 }

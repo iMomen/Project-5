@@ -5,24 +5,37 @@ function appViewModel() {
   var infowindow;
   var chapelHill = new google.maps.LatLng(35.908759, -79.048100);
   var markersArray = [];
+  var marker;
 
   self.allPlaces = ko.observableArray([]);
 
+  self.clickMarker = function(place) {
+    for(var e = 0; e < markersArray.length; e++)
+    if(place.place_id === markersArray[e].place_id) {      
+      map.panTo(markersArray[e].position);      
+      var contentString = place.name;
+      infowindow.setContent(contentString);
+      infowindow.open(map, markersArray[e]);
+      markersArray[e].setAnimation(google.maps.Animation.BOUNCE);
+      setTimeout(function(){markersArray[e].setAnimation(null);}, 1500);
+    }
+  }
 
+  function toggleBounce() {
+    if (marker.getAnimation() != null) {
+      marker.setAnimation(null);
+    } else {
+      marker.setAnimation(google.maps.Animation.BOUNCE);
+    }
+    setTimeout(toggleBounce, 1500);    
+  }
 
-  function populateAllPlaces(place){
+  function getAllPlaces(place){
     var myPlace = {};
-    var address;
     myPlace.place_id = place.place_id;
     myPlace.position = place.geometry.location.toString();
     myPlace.name = place.name;
-
-    if (place.vicinity !== undefined){
-      address = place.vicinity;
-    } else if (place.formatted_address !== undefined){
-      address = place.formatted_address;
-    }
-    myPlace.address = address;
+    
     self.allPlaces.push(myPlace);
   }
 
@@ -49,16 +62,9 @@ function appViewModel() {
         if (places[i] !== undefined){
           place = places[i];
 
-          if (place.name == undefined){
-            place.name = 'Unkown Name';
-          }
-          if (place.formatted_address == undefined){
-            place.formatted_address = 'Unknown Address';
-          }
-
-          populateAllPlaces(place);
+          getAllPlaces(place);
           createMarker(place);
-          bounds.extend(place.geometry.location);
+          bounds.extend(place.geometry.location);          
         }        
       } 
       map.fitBounds(bounds);     
@@ -91,27 +97,27 @@ function appViewModel() {
           place.geometry.location.lng()));
       })
       map.fitBounds(bounds);
-      results.forEach(populateAllPlaces);
+      results.forEach(getAllPlaces);
     }
   }
 
   function createMarker(place) {
     var marker = new google.maps.Marker({
       map: map,
+      icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+      name: place.name.toLowerCase(),
       position: place.geometry.location,
+      place_id: place.place_id,
       animation: google.maps.Animation.DROP
-    });
-    var address;
-    if (place.vicinity !== undefined){
-      address = place.vicinity;
-    } else if (place.formatted_address !== undefined){
-      address = place.formatted_address;
-    }
-    var contentString = '<div class="strong">' +place.name+ '</div><div>' + address + '</div>';
+    });   
+    var contentString = place.name
     markersArray.push(marker);
     google.maps.event.addListener(marker, 'click', function() {
       infowindow.setContent(contentString);
-      infowindow.open(map, this);      
+      infowindow.open(map, this);
+      map.panTo(marker.position); 
+      marker.setAnimation(google.maps.Animation.BOUNCE);
+      setTimeout(function(){marker.setAnimation(null);}, 1450);
     });
     return marker;
   }
@@ -121,10 +127,13 @@ function appViewModel() {
      markersArray[i].setMap(null);
     }
     markersArray.length = 0;
-  }
+  }  
 
   google.maps.event.addDomListener(window, 'load', initialize);
 };
+
+
+
 
 $(function(){
 ko.applyBindings(new appViewModel());

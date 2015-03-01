@@ -18,12 +18,10 @@
     <div id="list">
         <h2 style="text-align: center;">Good Eats!</h2>
         <ul data-bind="foreach: allPlaces">
-            <li>
+            <li data-bind="click: $parent.clickMarker">
                 <p data-bind="text: name"></p> 
-                <p data-bind="text: address"></p> 
             </li>
-            
-
-
+        </ul>
+    </div>
 </body>
 </html>
