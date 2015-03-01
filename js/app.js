@@ -13,36 +13,32 @@ function appViewModel() {
     for(var e = 0; e < markersArray.length; e++)
     if(place.place_id === markersArray[e].place_id) {      
       map.panTo(markersArray[e].position);      
-      var contentString = place.name;
+      var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + place.address + '</div>';
       infowindow.setContent(contentString);
       infowindow.open(map, markersArray[e]);
-      markersArray[e].setAnimation(google.maps.Animation.BOUNCE);
-      setTimeout(function(){markersArray[e].setAnimation(null);}, 1500);
     }
-  }
-
-  function toggleBounce() {
-    if (marker.getAnimation() != null) {
-      marker.setAnimation(null);
-    } else {
-      marker.setAnimation(google.maps.Animation.BOUNCE);
-    }
-    setTimeout(toggleBounce, 1500);    
   }
 
   function getAllPlaces(place){
-    var myPlace = {};
+    var myPlace = {};    
     myPlace.place_id = place.place_id;
     myPlace.position = place.geometry.location.toString();
     myPlace.name = place.name;
+
+    var address;
+    if (place.vicinity !== undefined) {
+      address = place.vicinity;
+    } else if (place.formatted_address !== undefined) {
+      address = place.formatted_address;
+    }
+    myPlace.address = address;
     
     self.allPlaces.push(myPlace);
   }
 
   function initialize() {
     map = new google.maps.Map(document.getElementById('map-canvas'), {
-    center: chapelHill,
-    zoom: 15
+    center: chapelHill,    
     });
     getPlaces();
 
@@ -109,8 +105,15 @@ function appViewModel() {
       position: place.geometry.location,
       place_id: place.place_id,
       animation: google.maps.Animation.DROP
-    });   
-    var contentString = place.name
+    });
+    var address;
+    if (place.vicinity !== undefined) {
+      address = place.vicinity;
+    } else if (place.formatted_address !== undefined) {
+      address = place.formatted_address;
+    }
+    marker.address = address;   
+    var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + marker.address + '</div>';
     markersArray.push(marker);
     google.maps.event.addListener(marker, 'click', function() {
       infowindow.setContent(contentString);
@@ -131,9 +134,6 @@ function appViewModel() {
 
   google.maps.event.addDomListener(window, 'load', initialize);
 };
-
-
-
 
 $(function(){
 ko.applyBindings(new appViewModel());
