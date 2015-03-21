@@ -29,21 +29,25 @@ function appViewModel() {
         var venue = response.response.venues[0];
         var venueID = venue.id;          
         var venueName = venue.name;
-            if (venueName !== null && venueName !== undefined){
+            if (venueName !== null && venueName !== undefined) {
                 self.foursquareInfo += 'Name: ' +
                   venueName + '<br>';
             } else {
               self.foursquareInfo += 'Name: Not Found';
             }     
         var phoneNum = venue.contact.formattedPhone;
-            if (phoneNum !== null && phoneNum !== undefined){
+            if (phoneNum !== null && phoneNum !== undefined) {
                 self.foursquareInfo += 'Phone: ' +
                   phoneNum + '<br>';
             } else {
               self.foursquareInfo += 'Phone: Not Found';
             }
-
-      })
+        var twitterId = venue.contact.twitter;
+            if (twitterId !== null && twitterId !== undefined) {
+              self.foursquareInfo += 'twitter: @' +
+                  twitterId + '<br>';
+            } 
+      });
   };  
  
   /*
