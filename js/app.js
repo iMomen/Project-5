@@ -10,28 +10,28 @@ function appViewModel() {
   var marker;
 
   self.allPlaces = ko.observableArray([]);
-  self.the4Sstring = '';
+  self.foursquareInfo = '';
 
   // Foursquare Credentials
   var clientID = 'UVSLUM00CXLUB1P0UKPJSLDTG0VVYQ2E20W1C045PBU1OJNZ';
   var clientSecret = 'JERNMOY0EUXF4LGZTWDLLJFR2CXWDSZWL1JU2W5CS1POPZBF';
 
   this.getFoursquareInfo = function(point) {
-    var foursquareURL = 'https://api.foursquare.com/v2/venues/search?client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20150321' + '&ll=' +lat+ ',' +lng+ '&query=\'' +point.name +'\'&limit=2';
+    var foursquareURL = 'https://api.foursquare.com/v2/venues/search?client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20150321' + '&ll=' +lat+ ',' +lng+ '&query=\'' +point.name +'\'&limit=1';
     
     $.getJSON(foursquareURL)
       .done(function(response) {
-        self.the4Sstring = '<p>Foursquare info:<br>';
+        self.foursquareInfo = '<p>From Foursquare:<br>';
         var venue = response.response.venues[0];
         var venueID = venue.id;
         var venueName = venue.name;
             if (venueName !== null && venueName !== undefined){
-                self.the4Sstring = self.the4Sstring + 'name: ' +
+                self.foursquareInfo += 'name: ' +
                   venueName + '<br>';
             }        
         var phoneNum = venue.contact.formattedPhone;
             if (phoneNum !== null && phoneNum !== undefined){
-                self.the4Sstring = self.the4Sstring + 'phone: ' +
+                self.foursquareInfo += 'phone: ' +
                   phoneNum + '<br>';
             }
       })
@@ -41,14 +41,15 @@ function appViewModel() {
   Function that will pan to the position and open an info window of an item clicked in the list.
   */
   self.clickMarker = function(place) {
-    for(var e = 0; e < markersArray.length; e++)
-    if(place.place_id === markersArray[e].place_id) {      
-      map.panTo(markersArray[e].position);      
-      var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + place.address + '</div>' + self.the4Sstring;
+    for(var e = 0; e < markersArray.length; e++)      
+    if(place.place_id === markersArray[e].place_id) { 
+      self.getFoursquareInfo(place);     
+      map.panTo(markersArray[e].position);            
+      var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + place.address + '</div>' + self.foursquareInfo;
+      
       infowindow.setContent(contentString);
       infowindow.open(map, markersArray[e]);  
-      markersArray[e].setAnimation(google.maps.Animation.DROP); 
-      self.getFoursquareInfo(place);
+      markersArray[e].setAnimation(google.maps.Animation.DROP);      
     }
   }
 
@@ -139,7 +140,7 @@ function appViewModel() {
           place.geometry.location.lng()));
       })
       map.fitBounds(bounds);
-      results.forEach(getAllPlaces);           
+      results.forEach(getAllPlaces);                 
     }
   }
 
@@ -154,18 +155,17 @@ function appViewModel() {
       position: place.geometry.location,
       place_id: place.place_id,
       animation: google.maps.Animation.DROP
-    });
+    });    
     var address;
     if (place.vicinity !== undefined) {
       address = place.vicinity;
     } else if (place.formatted_address !== undefined) {
       address = place.formatted_address;
-    }
-    marker.address = address;   
-    var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + marker.address + '</div>' ;
+    }       
+    var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + address + '</div>' + self.foursquareInfo ;
 
-    google.maps.event.addListener(marker, 'click', function() {
-      infowindow.setContent(contentString);
+    google.maps.event.addListener(marker, 'click', function() {      
+      infowindow.setContent(contentString);      
       infowindow.open(map, this);
       map.panTo(marker.position); 
       marker.setAnimation(google.maps.Animation.BOUNCE);
