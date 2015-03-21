@@ -27,14 +27,16 @@ function appViewModel() {
       .done(function(response) {
         self.foursquareInfo = '<p>Foursquare:<br>';
         var venue = response.response.venues[0];
-        var venueID = venue.id;          
+        var venueID = venue.id;   
+        // Name       
         var venueName = venue.name;
             if (venueName !== null && venueName !== undefined) {
                 self.foursquareInfo += 'Name: ' +
                   venueName + '<br>';
             } else {
               self.foursquareInfo += 'Name: Not Found';
-            }     
+            }   
+        // Phone Number     
         var phoneNum = venue.contact.formattedPhone;
             if (phoneNum !== null && phoneNum !== undefined) {
                 self.foursquareInfo += 'Phone: ' +
@@ -42,6 +44,7 @@ function appViewModel() {
             } else {
               self.foursquareInfo += 'Phone: Not Found';
             }
+        // Twitter
         var twitterId = venue.contact.twitter;
             if (twitterId !== null && twitterId !== undefined) {
               self.foursquareInfo += 'twitter: @' +
