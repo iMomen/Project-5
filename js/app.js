@@ -9,7 +9,10 @@ function appViewModel() {
   var markersArray = [];
   var marker;
 
+  // array to hold info for knockout
   self.allPlaces = ko.observableArray([]);
+
+  // string to hold foursquare information
   self.foursquareInfo = '';
 
   // Foursquare Credentials
@@ -17,23 +20,29 @@ function appViewModel() {
   var clientSecret = 'JERNMOY0EUXF4LGZTWDLLJFR2CXWDSZWL1JU2W5CS1POPZBF';
 
   this.getFoursquareInfo = function(point) {
+    // creats our foursquare URL
     var foursquareURL = 'https://api.foursquare.com/v2/venues/search?client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20150321' + '&ll=' +lat+ ',' +lng+ '&query=\'' +point.name +'\'&limit=1';
     
     $.getJSON(foursquareURL)
       .done(function(response) {
-        self.foursquareInfo = '<p>From Foursquare:<br>';
+        self.foursquareInfo = '<p>Foursquare:<br>';
         var venue = response.response.venues[0];
-        var venueID = venue.id;
+        var venueID = venue.id;          
         var venueName = venue.name;
             if (venueName !== null && venueName !== undefined){
-                self.foursquareInfo += 'name: ' +
+                self.foursquareInfo += 'Name: ' +
                   venueName + '<br>';
-            }        
+            } else {
+              self.foursquareInfo += 'Name: Not Found';
+            }     
         var phoneNum = venue.contact.formattedPhone;
             if (phoneNum !== null && phoneNum !== undefined){
-                self.foursquareInfo += 'phone: ' +
+                self.foursquareInfo += 'Phone: ' +
                   phoneNum + '<br>';
+            } else {
+              self.foursquareInfo += 'Phone: Not Found';
             }
+
       })
   };  
  
@@ -41,17 +50,25 @@ function appViewModel() {
   Function that will pan to the position and open an info window of an item clicked in the list.
   */
   self.clickMarker = function(place) {
-    for(var e = 0; e < markersArray.length; e++)      
-    if(place.place_id === markersArray[e].place_id) { 
-      self.getFoursquareInfo(place);     
-      map.panTo(markersArray[e].position);            
+    var marker;
+
+    for(var e = 0; e < markersArray.length; e++) {      
+      if(place.place_id === markersArray[e].place_id) { 
+        marker = markersArray[e];
+        break; 
+      }
+    } 
+    self.getFoursquareInfo(place);         
+    map.panTo(marker.position);   
+
+    // waits 200 milliseconds for the getFoursquare async function to finish
+    setTimeout(function() {
       var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + place.address + '</div>' + self.foursquareInfo;
-      
       infowindow.setContent(contentString);
-      infowindow.open(map, markersArray[e]);  
-      markersArray[e].setAnimation(google.maps.Animation.DROP);      
-    }
-  }
+      infowindow.open(map, marker); 
+      marker.setAnimation(google.maps.Animation.DROP); 
+    }, 200);     
+  };
 
 
   /*
@@ -63,7 +80,7 @@ function appViewModel() {
     myPlace.position = place.geometry.location.toString();
     myPlace.name = place.name;
 
-    var address;
+    var address;    
     if (place.vicinity !== undefined) {
       address = place.vicinity;
     } else if (place.formatted_address !== undefined) {
@@ -72,7 +89,7 @@ function appViewModel() {
     myPlace.address = address;
     
     self.allPlaces.push(myPlace);                
-  }
+  };
 
   /*
   Loads the map as well as position the search bar and list.  On a search, clearOverlays removes all markers already on the map and removes all info in allPlaces.  Then, once a search is complete, populates more markers and sends the info to getAllPlaces to populate allPlaces again.
@@ -110,7 +127,7 @@ function appViewModel() {
       var bounds = map.getBounds();
       searchBox.setBounds(bounds);
     });      
-  }
+  };
 
   /*
   Function to pre-populate the map with place types.  nearbySearch retuns up to 20 places.
@@ -125,7 +142,7 @@ function appViewModel() {
     infowindow = new google.maps.InfoWindow();
     service = new google.maps.places.PlacesService(map);
     service.nearbySearch(request, callback);    
-  }
+  };
 
   /*
   Gets the callback from Google and creates a marker for each place.  Sends info to getAllPlaces.
@@ -142,7 +159,7 @@ function appViewModel() {
       map.fitBounds(bounds);
       results.forEach(getAllPlaces);                 
     }
-  }
+  };
 
   /*
   Function to create a marker at each place.  This is called on load of the map with the pre-populated list, and also after each search.  Also sets the content of each place's infowindow.
@@ -174,18 +191,17 @@ function appViewModel() {
 
     markersArray.push(marker);
     return marker;
-
-  }
+  };
 
   /*
-  called after a search, this function clears any markes in the markersArray so that we can start with fresh map with new markers.
+  called after a search, this function clears any markers in the markersArray so that we can start with fresh map with new markers.
   */
   function clearOverlays() {
     for (var i = 0; i < markersArray.length; i++ ) {
      markersArray[i].setMap(null);
     }
     markersArray.length = 0;
-  }  
+  };  
 
   google.maps.event.addDomListener(window, 'load', initialize);
 };
