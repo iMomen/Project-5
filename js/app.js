@@ -68,13 +68,13 @@ function appViewModel() {
     self.getFoursquareInfo(place);         
     map.panTo(marker.position);   
 
-    // waits 200 milliseconds for the getFoursquare async function to finish
+    // waits 300 milliseconds for the getFoursquare async function to finish
     setTimeout(function() {
       var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + place.address + '</div>' + self.foursquareInfo;
       infowindow.setContent(contentString);
       infowindow.open(map, marker); 
       marker.setAnimation(google.maps.Animation.DROP); 
-    }, 200);     
+    }, 300);     
   };
 
 
@@ -133,7 +133,16 @@ function appViewModel() {
     google.maps.event.addListener(map, 'bounds_changed', function(){
       var bounds = map.getBounds();
       searchBox.setBounds(bounds);
-    });      
+    });   
+    // Handles an event where Google Maps taks too long to load
+    var timer = window.setTimeout(failedToLoad, 4000);
+    google.maps.event.addListener(map, 'tilesloaded', function() {
+      window.clearTimeout(timer);
+    })
+  };
+  // Will let the user know when Google Maps fails to load.
+  function failedToLoad() {
+    $('#map-canvas').html("Google Maps Failed to Load");
   };
 
   /*
